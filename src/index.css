@@ -30,19 +30,46 @@
 
 @keyframes pulseGlow {
   0%, 100% {
-    box-shadow: 0 0 15px rgba(245, 158, 11, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.6);
+    box-shadow: 0 0 20px rgba(245, 158, 11, 0.5), inset 0 2px 4px rgba(255, 255, 255, 0.8);
   }
   50% {
-    box-shadow: 0 0 28px rgba(245, 158, 11, 0.8), inset 0 2px 4px rgba(255, 255, 255, 0.9);
+    box-shadow: 0 0 35px rgba(245, 158, 11, 0.95), inset 0 2px 4px rgba(255, 255, 255, 1);
   }
 }
 
-@keyframes gentleShake {
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+@keyframes neonHalo {
+  0%, 100% {
+    box-shadow: 0 0 0 4px #F59E0B, 0 0 25px rgba(245, 158, 11, 0.85);
+    transform: scale(1.08);
+  }
+  50% {
+    box-shadow: 0 0 0 7px #FBBF24, 0 0 38px rgba(251, 191, 36, 1);
+    transform: scale(1.15);
+  }
+}
+
+@keyframes elasticShake {
   0%, 100% { transform: translateX(0); }
-  20% { transform: translateX(-8px) rotate(-1deg); }
-  40% { transform: translateX(8px) rotate(1deg); }
-  60% { transform: translateX(-6px) rotate(-0.5deg); }
-  80% { transform: translateX(6px) rotate(0.5deg); }
+  15% { transform: translateX(-12px) rotate(-1.5deg); }
+  30% { transform: translateX(11px) rotate(1.5deg); }
+  45% { transform: translateX(-8px) rotate(-1deg); }
+  60% { transform: translateX(7px) rotate(1deg); }
+  75% { transform: translateX(-3px); }
+}
+
+@keyframes dashMove {
+  to {
+    stroke-dashoffset: -28;
+  }
 }
 
 .animate-float-slow {
@@ -54,36 +81,49 @@
 }
 
 .animate-pulse-glow {
-  animation: pulseGlow 2s ease-in-out infinite;
+  animation: pulseGlow 1.5s ease-in-out infinite;
 }
 
-.animate-shake {
-  animation: gentleShake 0.45s ease-in-out;
+.animate-shimmer {
+  animation: shimmer 3s infinite linear;
+}
+
+.animate-elastic-shake {
+  animation: elasticShake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+.animate-dash {
+  animation: dashMove 0.8s linear infinite;
+}
+
+.hint-highlight {
+  animation: neonHalo 1.2s infinite ease-in-out !important;
+  z-index: 35 !important;
 }
 
 /* Tactile 3D Buttons & Tiles */
 .tactile-button {
   transition: all 0.12s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 6px 0 rgba(0, 0, 0, 0.18), 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 6px 0 rgba(0, 0, 0, 0.2), 0 12px 20px -3px rgba(0, 0, 0, 0.15);
 }
 .tactile-button:active:not(:disabled) {
-  transform: translateY(4px);
-  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.18), 0 4px 6px -2px rgba(0, 0, 0, 0.1);
+  transform: translateY(4px) scale(0.97);
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.2), 0 4px 6px -2px rgba(0, 0, 0, 0.1);
 }
 
 .tile-3d {
   transition: transform 0.15s ease, box-shadow 0.15s ease;
-  box-shadow: 0 6px 0 rgba(0, 0, 0, 0.16), 0 8px 12px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 6px 0 rgba(0, 0, 0, 0.18), 0 8px 14px rgba(0, 0, 0, 0.1);
 }
 .tile-3d:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 0 rgba(0, 0, 0, 0.16), 0 12px 18px rgba(0, 0, 0, 0.12);
+  transform: translateY(-3px) scale(1.03);
+  box-shadow: 0 9px 0 rgba(0, 0, 0, 0.18), 0 14px 20px rgba(0, 0, 0, 0.14);
 }
 .tile-3d:active {
-  transform: translateY(3px);
-  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.16), 0 5px 8px rgba(0, 0, 0, 0.1);
+  transform: translateY(3px) scale(0.96);
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.18), 0 5px 8px rgba(0, 0, 0, 0.1);
 }
 
 .slot-sunken {
-  box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.18), inset 0 1px 2px rgba(0, 0, 0, 0.1);
+  box-shadow: inset 0 3px 8px rgba(0, 0, 0, 0.2), inset 0 1px 3px rgba(0, 0, 0, 0.12);
 }

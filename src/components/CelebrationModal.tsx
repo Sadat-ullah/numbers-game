@@ -1,11 +1,12 @@
 import React, { useEffect } from 'react';
 import confetti from 'canvas-confetti';
-import { Star, ArrowRight, RotateCcw, Grid } from 'lucide-react';
+import { Star, ArrowRight, RotateCcw, Grid, Lightbulb } from 'lucide-react';
 import { sound } from '../game/audio/soundEngine';
 
 interface CelebrationModalProps {
   levelId: number;
   stars: number;
+  hintEarned?: boolean;
   onNextLevel: () => void;
   onReplayLevel: () => void;
   onOpenLevelGrid: () => void;
@@ -14,6 +15,7 @@ interface CelebrationModalProps {
 export const CelebrationModal: React.FC<CelebrationModalProps> = ({
   levelId,
   stars,
+  hintEarned = false,
   onNextLevel,
   onReplayLevel,
   onOpenLevelGrid,
@@ -21,8 +23,8 @@ export const CelebrationModal: React.FC<CelebrationModalProps> = ({
   useEffect(() => {
     // Fire geometric pastel confetti
     confetti({
-      particleCount: 70,
-      spread: 80,
+      particleCount: 80,
+      spread: 85,
       origin: { y: 0.6 },
       colors: ['#F59E0B', '#10B981', '#06B6D4', '#8B5CF6', '#F43F5E'],
       shapes: ['square', 'circle'],
@@ -30,22 +32,25 @@ export const CelebrationModal: React.FC<CelebrationModalProps> = ({
   }, []);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/60 backdrop-blur-sm animate-in fade-in">
-      <div className="relative w-full max-w-md bg-white rounded-3xl p-6 sm:p-8 shadow-2xl border-4 border-amber-300 text-center flex flex-col items-center animate-in zoom-in-95 duration-200">
+    <div
+      data-testid="celebration-modal"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/60 backdrop-blur-sm animate-in fade-in"
+    >
+      <div className="relative w-full max-w-sm bg-white rounded-3xl p-6 sm:p-7 shadow-2xl border-4 border-amber-300 text-center flex flex-col items-center animate-in zoom-in-95 duration-200">
         {/* Top Trophy Banner */}
-        <div className="w-20 h-20 -mt-14 mb-2 rounded-3xl bg-gradient-to-tr from-amber-400 to-yellow-300 border-4 border-white flex items-center justify-center shadow-lg text-4xl animate-bounce">
+        <div className="w-18 h-18 -mt-13 mb-2 rounded-3xl bg-gradient-to-tr from-amber-400 to-yellow-300 border-4 border-white flex items-center justify-center shadow-lg text-4xl animate-bounce">
           🏆
         </div>
 
-        <h2 className="text-3xl font-extrabold text-stone-800 tracking-tight">
+        <h2 className="text-2xl sm:text-3xl font-extrabold text-stone-800 tracking-tight">
           Solved!
         </h2>
-        <p className="text-stone-500 font-medium text-sm mt-1">
-          Level {levelId} Complete
-        </p>
+        <span className="text-stone-400 font-bold text-xs uppercase tracking-wider mt-0.5">
+          Level {levelId}
+        </span>
 
         {/* Star Rating Reveal */}
-        <div className="flex items-center justify-center gap-3 my-6">
+        <div className="flex items-center justify-center gap-3 my-4">
           {[1, 2, 3].map(index => {
             const isEarned = index <= stars;
             return (
@@ -58,7 +63,7 @@ export const CelebrationModal: React.FC<CelebrationModalProps> = ({
                 }`}
               >
                 <Star
-                  size={42}
+                  size={38}
                   fill={isEarned ? '#F59E0B' : '#E2E8F0'}
                   stroke={isEarned ? '#D97706' : '#CBD5E1'}
                   strokeWidth={2}
@@ -68,28 +73,41 @@ export const CelebrationModal: React.FC<CelebrationModalProps> = ({
           })}
         </div>
 
+        {/* Hint Earned Badge (Fix 2) */}
+        {hintEarned && (
+          <div
+            data-testid="hint-reward-badge"
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-amber-100 to-yellow-100 border border-amber-300 text-amber-900 font-extrabold text-xs mb-3 shadow-xs animate-bounce"
+          >
+            <Lightbulb size={15} className="fill-amber-500 text-amber-600 shrink-0" />
+            <span>+1 💡 Hint Earned!</span>
+          </div>
+        )}
+
         {/* Action Buttons */}
-        <div className="flex flex-col gap-3 w-full mt-2">
+        <div className="flex flex-col gap-2.5 w-full mt-1">
           <button
             onClick={() => {
               sound.playTilePickup();
               onNextLevel();
             }}
-            className="tactile-button w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 text-white font-extrabold text-lg sm:text-xl flex items-center justify-center gap-3 border-b-4 border-orange-700 active:border-b-0 cursor-pointer shadow-md"
+            data-testid="celebration-next-button"
+            className="tactile-button w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 text-white font-extrabold text-lg flex items-center justify-center gap-2 border-b-4 border-orange-700 active:border-b-0 cursor-pointer shadow-md"
           >
-            <span>Next Level</span>
-            <ArrowRight size={22} strokeWidth={3} />
+            <span>Next</span>
+            <ArrowRight size={20} strokeWidth={3} />
           </button>
 
-          <div className="flex items-center gap-3 w-full">
+          <div className="flex items-center gap-2.5 w-full">
             <button
               onClick={() => {
                 sound.playTilePickup();
                 onReplayLevel();
               }}
-              className="flex-1 py-3 rounded-2xl bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold text-sm border border-stone-300 flex items-center justify-center gap-2 active:scale-95 transition-all"
+              data-testid="celebration-replay-button"
+              className="flex-1 py-2.5 rounded-2xl bg-stone-100 hover:bg-stone-200 text-stone-700 font-extrabold text-xs border border-stone-300 flex items-center justify-center gap-1.5 active:scale-95 transition-all cursor-pointer"
             >
-              <RotateCcw size={16} />
+              <RotateCcw size={14} />
               <span>Replay</span>
             </button>
 
@@ -98,10 +116,11 @@ export const CelebrationModal: React.FC<CelebrationModalProps> = ({
                 sound.playTilePickup();
                 onOpenLevelGrid();
               }}
-              className="flex-1 py-3 rounded-2xl bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold text-sm border border-stone-300 flex items-center justify-center gap-2 active:scale-95 transition-all"
+              data-testid="celebration-grid-button"
+              className="flex-1 py-2.5 rounded-2xl bg-stone-100 hover:bg-stone-200 text-stone-700 font-extrabold text-xs border border-stone-300 flex items-center justify-center gap-1.5 active:scale-95 transition-all cursor-pointer"
             >
-              <Grid size={16} />
-              <span>Chapters</span>
+              <Grid size={14} />
+              <span>Levels</span>
             </button>
           </div>
         </div>

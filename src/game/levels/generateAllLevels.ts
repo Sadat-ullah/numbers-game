@@ -18,7 +18,6 @@ export interface LevelData {
   worldThemeColor: string;
   target: number;
   description: string;
-  ageGroup: string;
   slots: SlotDefinition[];
   trayTiles: TileItem[];
   hintText: string;
@@ -33,16 +32,16 @@ function opTile(id: string, op: string): TileItem {
 }
 
 export const WORLD_METADATA = [
-  { world: 1, title: "Starter Workshop", age: "Ages 3–5", color: "#F97316", desc: "Two numbers + simple addition" },
-  { world: 2, title: "Addition Atelier", age: "Ages 5–6", color: "#06B6D4", desc: "Larger addition with distractors" },
-  { world: 3, title: "Subtraction Studio", age: "Ages 6–7", color: "#EC4899", desc: "Subtraction & correct operand order" },
-  { world: 4, title: "Trio Tower", age: "Ages 7–8", color: "#8B5CF6", desc: "Three-number equation construction" },
-  { world: 5, title: "Multiplication Mill", age: "Ages 8–9", color: "#EAB308", desc: "Multiplication factors" },
-  { world: 6, title: "BODMAS Bridge", age: "Ages 9–10", color: "#10B981", desc: "Mixed operation precedence" },
-  { world: 7, title: "Division Foundry", age: "Ages 9–10", color: "#3B82F6", desc: "Whole-number division pairs" },
-  { world: 8, title: "Architect Academy", age: "Ages 10–11", color: "#6366F1", desc: "Locked anchors & all 4 operations" },
-  { world: 9, title: "Master Blueprint", age: "Ages 11–12", color: "#D946EF", desc: "Placing both numbers & operators" },
-  { world: 10, title: "Infinity Vault", age: "Ages 11–12", color: "#F43F5E", desc: "Zero traps & identity challenges" },
+  { world: 1, title: "Starter Workshop", color: "#F97316", desc: "Two numbers + addition" },
+  { world: 2, title: "Addition Atelier", color: "#06B6D4", desc: "Addition" },
+  { world: 3, title: "Subtraction Studio", color: "#EC4899", desc: "Subtraction" },
+  { world: 4, title: "Trio Tower", color: "#8B5CF6", desc: "Three numbers" },
+  { world: 5, title: "Multiplication Mill", color: "#EAB308", desc: "Multiplication" },
+  { world: 6, title: "BODMAS Bridge", color: "#10B981", desc: "Order of operations" },
+  { world: 7, title: "Division Foundry", color: "#3B82F6", desc: "Division" },
+  { world: 8, title: "Architect Academy", color: "#6366F1", desc: "Four operations" },
+  { world: 9, title: "Master Blueprint", color: "#D946EF", desc: "Numbers & operators" },
+  { world: 10, title: "Infinity Vault", color: "#F43F5E", desc: "Special challenges" },
 ];
 
 /**
@@ -53,7 +52,7 @@ export function buildAllLevels(): LevelData[] {
   const levels: LevelData[] = [];
 
   // -------------------------------------------------------------
-  // World 1: Levels 1–10 (Ages 3–5)
+  // World 1: Levels 1–10
   // Two numbers + one pre-filled addition operator: [ ] + [ ] = Target
   // -------------------------------------------------------------
   const w1Targets = [
@@ -84,7 +83,6 @@ export function buildAllLevels(): LevelData[] {
       worldThemeColor: WORLD_METADATA[0].color,
       target: cfg.target,
       description: `Build ${cfg.target} using addition!`,
-      ageGroup: "Ages 3–5",
       slots: [
         { id: `s-${lvlNum}-1`, expectedType: 'number', isLocked: false },
         { id: `s-${lvlNum}-op`, expectedType: 'operator', isLocked: true, value: '+' },
@@ -96,7 +94,7 @@ export function buildAllLevels(): LevelData[] {
   });
 
   // -------------------------------------------------------------
-  // World 2: Levels 11–20 (Ages 5–6)
+  // World 2: Levels 11–20
   // Larger addition combinations: [ ] + [ ] = Target (4 numbers + distractor operator)
   // -------------------------------------------------------------
   const w2Targets = [
@@ -128,7 +126,6 @@ export function buildAllLevels(): LevelData[] {
       worldThemeColor: WORLD_METADATA[1].color,
       target: cfg.target,
       description: `Make the sum equal ${cfg.target}. Beware of distractor tiles!`,
-      ageGroup: "Ages 5–6",
       slots: [
         { id: `s-${lvlNum}-1`, expectedType: 'number', isLocked: false },
         { id: `s-${lvlNum}-op`, expectedType: 'operator', isLocked: true, value: '+' },
@@ -140,7 +137,7 @@ export function buildAllLevels(): LevelData[] {
   });
 
   // -------------------------------------------------------------
-  // World 3: Levels 21–30 (Ages 6–7)
+  // World 3: Levels 21–30
   // Subtraction constructions: [ ] - [ ] = Target (correct operand order)
   // -------------------------------------------------------------
   const w3Targets = [
@@ -171,7 +168,6 @@ export function buildAllLevels(): LevelData[] {
       worldThemeColor: WORLD_METADATA[2].color,
       target: cfg.target,
       description: `Subtract to get ${cfg.target}. Remember: larger number goes first!`,
-      ageGroup: "Ages 6–7",
       slots: [
         { id: `s-${lvlNum}-1`, expectedType: 'number', isLocked: false },
         { id: `s-${lvlNum}-op`, expectedType: 'operator', isLocked: true, value: '-' },
@@ -183,7 +179,7 @@ export function buildAllLevels(): LevelData[] {
   });
 
   // -------------------------------------------------------------
-  // World 4: Levels 31–40 (Ages 7–8)
+  // World 4: Levels 31–40
   // Three-number equations: [ ] + [ ] + [ ] = Target (commutative)
   // -------------------------------------------------------------
   const w4Targets = [
@@ -213,7 +209,6 @@ export function buildAllLevels(): LevelData[] {
       worldThemeColor: WORLD_METADATA[3].color,
       target: cfg.target,
       description: `Combine three numbers to reach ${cfg.target}. Order doesn't matter!`,
-      ageGroup: "Ages 7–8",
       slots: [
         { id: `s-${lvlNum}-1`, expectedType: 'number', isLocked: false },
         { id: `s-${lvlNum}-op1`, expectedType: 'operator', isLocked: true, value: '+' },
@@ -227,7 +222,7 @@ export function buildAllLevels(): LevelData[] {
   });
 
   // -------------------------------------------------------------
-  // World 5: Levels 41–50 (Ages 8–9)
+  // World 5: Levels 41–50
   // Multiplication constructions: [ ] × [ ] = Target
   // -------------------------------------------------------------
   const w5Targets = [
@@ -258,7 +253,6 @@ export function buildAllLevels(): LevelData[] {
       worldThemeColor: WORLD_METADATA[4].color,
       target: cfg.target,
       description: `Multiply two factors to construct ${cfg.target}!`,
-      ageGroup: "Ages 8–9",
       slots: [
         { id: `s-${lvlNum}-1`, expectedType: 'number', isLocked: false },
         { id: `s-${lvlNum}-op`, expectedType: 'operator', isLocked: true, value: '×' },
@@ -270,7 +264,7 @@ export function buildAllLevels(): LevelData[] {
   });
 
   // -------------------------------------------------------------
-  // World 6: Levels 51–60 (Ages 9–10)
+  // World 6: Levels 51–60
   // Mixed precedence equations: [ ] + [ ] × [ ] = Target (BODMAS: multiply first!)
   // -------------------------------------------------------------
   const w6Targets = [
@@ -302,7 +296,6 @@ export function buildAllLevels(): LevelData[] {
       worldThemeColor: WORLD_METADATA[5].color,
       target: cfg.target,
       description: `BODMAS Rule: Multiplication happens before addition!`,
-      ageGroup: "Ages 9–10",
       slots: [
         { id: `s-${lvlNum}-1`, expectedType: 'number', isLocked: false },
         { id: `s-${lvlNum}-op1`, expectedType: 'operator', isLocked: true, value: '+' },
@@ -316,7 +309,7 @@ export function buildAllLevels(): LevelData[] {
   });
 
   // -------------------------------------------------------------
-  // World 7: Levels 61–70 (Ages 9–10)
+  // World 7: Levels 61–70
   // Division constructions: [ ] ÷ [ ] = Target (whole-number division pairs)
   // -------------------------------------------------------------
   const w7Targets = [
@@ -347,7 +340,6 @@ export function buildAllLevels(): LevelData[] {
       worldThemeColor: WORLD_METADATA[6].color,
       target: cfg.target,
       description: `Divide evenly to reach ${cfg.target}. Only whole-number pairs!`,
-      ageGroup: "Ages 9–10",
       slots: [
         { id: `s-${lvlNum}-1`, expectedType: 'number', isLocked: false },
         { id: `s-${lvlNum}-op`, expectedType: 'operator', isLocked: true, value: '÷' },
@@ -359,7 +351,7 @@ export function buildAllLevels(): LevelData[] {
   });
 
   // -------------------------------------------------------------
-  // World 8: Levels 71–80 (Ages 10–11)
+  // World 8: Levels 71–80
   // All four operations with locked anchor tiles: Anchor + [ ] ÷ [ ] = Target
   // -------------------------------------------------------------
   const w8Targets = [
@@ -394,7 +386,6 @@ export function buildAllLevels(): LevelData[] {
       worldThemeColor: WORLD_METADATA[7].color,
       target: cfg.target,
       description: `Anchor tile is locked! Complete the equation to reach ${cfg.target}.`,
-      ageGroup: "Ages 10–11",
       slots: [
         { id: `s-${lvlNum}-anchor`, expectedType: 'number', isLocked: true, value: String(cfg.anchor) },
         { id: `s-${lvlNum}-op1`, expectedType: 'operator', isLocked: true, value: op1 },
@@ -408,7 +399,7 @@ export function buildAllLevels(): LevelData[] {
   });
 
   // -------------------------------------------------------------
-  // World 9: Levels 81–94 (Ages 11–12)
+  // World 9: Levels 81–94
   // Multi-blank operator + number: [ ] [op] 5 [op] [ ] = Target
   // -------------------------------------------------------------
   const w9Configs = [
@@ -446,7 +437,6 @@ export function buildAllLevels(): LevelData[] {
       worldThemeColor: WORLD_METADATA[8].color,
       target: cfg.target,
       description: `Place both numbers and operators around the center anchor ${cfg.anchor}!`,
-      ageGroup: "Ages 11–12",
       slots: [
         { id: `s-${lvlNum}-1`, expectedType: 'number', isLocked: false },
         { id: `s-${lvlNum}-op1`, expectedType: 'operator', isLocked: false },
@@ -460,7 +450,7 @@ export function buildAllLevels(): LevelData[] {
   });
 
   // -------------------------------------------------------------
-  // World 10: Levels 95–100 (Ages 11–12)
+  // World 10: Levels 95–100
   // Zero, one & multi-step twists: [ ] × 0 + [ ] = Target
   // -------------------------------------------------------------
   const w10Configs = [
@@ -545,7 +535,6 @@ export function buildAllLevels(): LevelData[] {
       worldThemeColor: WORLD_METADATA[9].color,
       target: cfg.target,
       description: `Infinity Vault: Anything multiplied by 0 vanishes!`,
-      ageGroup: "Ages 11–12",
       slots,
       trayTiles: tiles,
       hintText: `Use the zero property or identity property to construct ${cfg.target}!`,

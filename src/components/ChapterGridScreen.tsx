@@ -78,9 +78,6 @@ export const ChapterGridScreen: React.FC<ChapterGridScreenProps> = ({
                 <div className="text-xs font-extrabold text-stone-800 leading-tight">
                   World {meta.world}
                 </div>
-                <div className="text-[10px] text-stone-400 font-semibold">
-                  {meta.age}
-                </div>
               </div>
             </button>
           );
@@ -88,19 +85,16 @@ export const ChapterGridScreen: React.FC<ChapterGridScreenProps> = ({
       </div>
 
       {/* Active World Banner */}
-      <div className="bg-white/90 backdrop-blur-md rounded-3xl p-5 sm:p-6 border border-stone-200/80 shadow-sm mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="bg-white/90 backdrop-blur-md rounded-3xl p-4 sm:p-5 border border-stone-200/80 shadow-xs mb-5 flex items-center justify-between gap-4">
         <div className="flex items-center gap-4">
-          <ChapterBadge world={worldMeta.world} size={56} unlocked={maxUnlockedLevel >= (worldMeta.world - 1) * 10 + 1} />
+          <ChapterBadge world={worldMeta.world} size={50} unlocked={maxUnlockedLevel >= (worldMeta.world - 1) * 10 + 1} />
           <div>
-            <span className="text-xs font-bold uppercase tracking-wider text-amber-600">
-              World {worldMeta.world} • {worldMeta.age}
+            <span className="text-[11px] font-bold uppercase tracking-wider text-amber-600">
+              World {worldMeta.world}
             </span>
-            <h2 className="text-xl sm:text-2xl font-extrabold text-stone-800">
+            <h2 className="text-lg sm:text-2xl font-extrabold text-stone-800">
               {worldMeta.title}
             </h2>
-            <p className="text-sm text-stone-500 font-medium">
-              {worldMeta.desc}
-            </p>
           </div>
         </div>
       </div>

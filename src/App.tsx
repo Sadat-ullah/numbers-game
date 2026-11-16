@@ -6,6 +6,7 @@ import { HomeScreen } from './components/HomeScreen';
 import { ChapterGridScreen } from './components/ChapterGridScreen';
 import { EquationBoard } from './components/EquationBoard';
 import { CelebrationModal } from './components/CelebrationModal';
+import { sound } from './game/audio/soundEngine';
 
 type AppScreen = 'home' | 'grid' | 'play';
 
@@ -26,10 +27,17 @@ export function App() {
     return saved ? JSON.parse(saved) : {};
   });
 
+  // Persistent Hint Economy (Fix 2: Starts with 3 free hints)
+  const [hintBalance, setHintBalance] = useState<number>(() => {
+    const saved = localStorage.getItem('nb_hint_balance');
+    return saved ? Math.max(0, parseInt(saved, 10)) : 3;
+  });
+
   const [isCelebrationOpen, setIsCelebrationOpen] = useState(false);
   const [celebrationStars, setCelebrationStars] = useState(3);
+  const [hintEarnedThisLevel, setHintEarnedThisLevel] = useState(false);
 
-  // Sync to localStorage
+  // Sync state to localStorage
   useEffect(() => {
     localStorage.setItem('nb_current_level', String(currentLevelId));
   }, [currentLevelId]);
@@ -42,12 +50,29 @@ export function App() {
     localStorage.setItem('nb_level_stars', JSON.stringify(levelStars));
   }, [levelStars]);
 
-  const activeLevel = ALL_LEVELS.find(l => l.id === currentLevelId) || ALL_LEVELS[0];
+  useEffect(() => {
+    localStorage.setItem('nb_hint_balance', String(hintBalance));
+  }, [hintBalance]);
 
+  const activeLevel = ALL_LEVELS.find(l => l.id === currentLevelId) || ALL_LEVELS[0];
   const totalStars = Object.values(levelStars).reduce((acc, curr) => acc + curr, 0);
+
+  const handleUseHint = () => {
+    setHintBalance(prev => Math.max(0, prev - 1));
+  };
 
   const handleLevelCompleted = (stars: number) => {
     setCelebrationStars(stars);
+
+    // Earning Hints: Reward +1 Hint every 3-star clear or milestone
+    const earnedHint = stars === 3 || currentLevelId % 3 === 0;
+    if (earnedHint) {
+      setHintBalance(prev => prev + 1);
+      setHintEarnedThisLevel(true);
+    } else {
+      setHintEarnedThisLevel(false);
+    }
+
     setIsCelebrationOpen(true);
 
     // Save star rating (keep best)
@@ -64,16 +89,22 @@ export function App() {
 
   const handleNextLevel = () => {
     setIsCelebrationOpen(false);
+    setHintEarnedThisLevel(false);
     if (currentLevelId < 100) {
       setCurrentLevelId(prev => prev + 1);
     } else {
-      // Reached the end of Level 100!
       setScreen('grid');
     }
   };
 
   const handleReplayLevel = () => {
     setIsCelebrationOpen(false);
+    setHintEarnedThisLevel(false);
+  };
+
+  const handleStartGame = () => {
+    sound.unlockAudio();
+    setScreen('play');
   };
 
   return (
@@ -85,7 +116,7 @@ export function App() {
       {screen !== 'home' && (
         <Header
           currentLevelId={screen === 'play' ? currentLevelId : undefined}
-          worldTitle={screen === 'play' ? `World ${activeLevel.world}: ${activeLevel.worldTitle}` : undefined}
+          worldTitle={screen === 'play' ? activeLevel.worldTitle : undefined}
           onGoHome={() => setScreen('home')}
           onOpenLevelGrid={screen === 'play' ? () => setScreen('grid') : undefined}
         />
@@ -98,7 +129,7 @@ export function App() {
             currentLevelId={currentLevelId}
             maxUnlockedLevel={maxUnlockedLevel}
             totalStars={totalStars}
-            onStartGame={() => setScreen('play')}
+            onStartGame={handleStartGame}
             onOpenLevelGrid={() => setScreen('grid')}
           />
         )}
@@ -117,18 +148,23 @@ export function App() {
 
         {screen === 'play' && (
           <EquationBoard
+            key={currentLevelId}
             level={activeLevel}
+            hintBalance={hintBalance}
+            onUseHint={handleUseHint}
             onLevelCompleted={handleLevelCompleted}
             onOpenLevelGrid={() => setScreen('grid')}
           />
         )}
       </main>
 
-      {/* Celebration Win Modal */}
+      {/* Celebration Win Modal (with key reset) */}
       {isCelebrationOpen && (
         <CelebrationModal
+          key={`celeb-${currentLevelId}`}
           levelId={currentLevelId}
           stars={celebrationStars}
+          hintEarned={hintEarnedThisLevel}
           onNextLevel={handleNextLevel}
           onReplayLevel={handleReplayLevel}
           onOpenLevelGrid={() => {

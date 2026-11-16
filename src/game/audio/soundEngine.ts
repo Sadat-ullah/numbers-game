@@ -3,7 +3,7 @@ class SoundEngine {
   private musicGain: GainNode | null = null;
   private sfxGain: GainNode | null = null;
   private masterGain: GainNode | null = null;
-  private isMusicPlaying = false;
+  public isMusicPlaying = false;
   private musicIntervalId: number | null = null;
 
   public musicMuted = false;
@@ -40,11 +40,21 @@ class SoundEngine {
     }
   }
 
+  public unlockAudio() {
+    this.initContext();
+    if (!this.musicMuted && !this.isMusicPlaying) {
+      this.startStudioMusic();
+    }
+  }
+
   public setMusicMuted(muted: boolean) {
     this.musicMuted = muted;
     localStorage.setItem('nb_music_muted', String(muted));
     if (this.musicGain && this.ctx) {
       this.musicGain.gain.setTargetAtTime(muted ? 0 : 0.28, this.ctx.currentTime, 0.05);
+    }
+    if (!muted && !this.isMusicPlaying) {
+      this.startStudioMusic();
     }
   }
 
@@ -143,7 +153,6 @@ class SoundEngine {
     osc.frequency.setValueAtTime(130, t);
     osc.frequency.exponentialRampToValueAtTime(65, t + 0.25);
 
-    // Filter to give it a soft, muted wood thud without harsh buzz
     const filter = this.ctx.createBiquadFilter();
     filter.type = 'lowpass';
     filter.frequency.setValueAtTime(260, t);
@@ -167,7 +176,6 @@ class SoundEngine {
     this.initContext();
     if (!this.ctx || !this.sfxGain) return;
 
-    // Arpeggiated C-Maj9 chord (C4, E4, G4, B4, D5)
     const notes = [261.63, 329.63, 392.00, 493.88, 587.33];
     notes.forEach((freq, idx) => {
       const t = this.ctx!.currentTime + idx * 0.07;
@@ -189,14 +197,13 @@ class SoundEngine {
   }
 
   /**
-   * Procedural Lo-Fi Kalimba ambient studio background loop
+   * Procedural Lo-Fi Kalimba ambient background loop
    */
   public startStudioMusic() {
+    this.initContext();
     if (this.isMusicPlaying) return;
     this.isMusicPlaying = true;
-    this.initContext();
 
-    // Kalimba progression in C Major / A Minor pentatonic
     const chords = [
       [261.63, 329.63, 392.00], // C major
       [220.00, 261.63, 329.63], // A minor
@@ -216,7 +223,6 @@ class SoundEngine {
       osc.type = 'sine';
       osc.frequency.setValueAtTime(freq, t);
 
-      // Kalimba tine overtone (3.2x fundamental)
       oscOvertone.type = 'sine';
       oscOvertone.frequency.setValueAtTime(freq * 3.2, t);
 
@@ -239,7 +245,6 @@ class SoundEngine {
       chord.forEach((freq, idx) => {
         playKalimbaNote(freq, idx * 0.45);
       });
-      // Add light melodic ornament
       playKalimbaNote(chord[0] * 2, 0.9);
       step++;
     };
@@ -259,18 +264,22 @@ class SoundEngine {
 
 export const sound = new SoundEngine();
 
-// Auto-unlock Web Audio context on mobile touch
+// Expose sound engine to window for root audio synchronization and testing
 if (typeof window !== 'undefined') {
-  const unlockAudio = () => {
-    if ((sound as unknown as { initContext: () => void }).initContext) {
-      (sound as unknown as { initContext: () => void }).initContext();
-    }
-    window.removeEventListener('touchstart', unlockAudio);
-    window.removeEventListener('touchend', unlockAudio);
-    window.removeEventListener('click', unlockAudio);
-  };
-  window.addEventListener('touchstart', unlockAudio, { passive: true });
-  window.addEventListener('touchend', unlockAudio, { passive: true });
-  window.addEventListener('click', unlockAudio, { passive: true });
+  (window as unknown as { __sound: SoundEngine }).__sound = sound;
 }
 
+// Auto-unlock Web Audio context and start music on very first user interaction
+if (typeof window !== 'undefined') {
+  const unlockAudio = () => {
+    sound.unlockAudio();
+    window.removeEventListener('pointerdown', unlockAudio);
+    window.removeEventListener('touchstart', unlockAudio);
+    window.removeEventListener('click', unlockAudio);
+    window.removeEventListener('keydown', unlockAudio);
+  };
+  window.addEventListener('pointerdown', unlockAudio, { passive: true });
+  window.addEventListener('touchstart', unlockAudio, { passive: true });
+  window.addEventListener('click', unlockAudio, { passive: true });
+  window.addEventListener('keydown', unlockAudio, { passive: true });
+}
