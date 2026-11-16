@@ -71,7 +71,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           onClick={() => sound.playTileSnap()}
         >
           <img
-            src="/assets/logo_number_builder.png"
+            src={`${import.meta.env.BASE_URL}assets/logo_number_builder.png`}
             alt="Number Builder"
             data-testid="game-logo"
             style={{ width: 'clamp(250px, 62vw, 520px)' }}
