@@ -20,6 +20,8 @@ interface DragState {
   fromSlotId?: string;
   startX: number;
   startY: number;
+  offsetX: number;
+  offsetY: number;
   currentX: number;
   currentY: number;
   hasMoved: boolean;
@@ -98,6 +100,26 @@ export const EquationBoard: React.FC<EquationBoardProps> = ({
     setHintArrowCoords(null);
   };
 
+  // Release placed tile back to tray
+  const releaseTileToTray = useCallback((tile: TileItem, fromSlotId?: string) => {
+    sound.playTilePickup();
+    if (fromSlotId) {
+      setSlotPlacements(prev => {
+        const next = { ...prev };
+        delete next[fromSlotId];
+        return next;
+      });
+    }
+    setTrayTiles(prev => {
+      if (prev.some(t => t.id === tile.id)) return prev;
+      return [...prev, tile];
+    });
+
+    setDragState(null);
+    setNativeDraggingTile(null);
+    setHoveredSlotId(null);
+  }, []);
+
   // Unified drop handler for both HTML5 drag and Pointer drag
   const dropTileIntoSlot = useCallback((tile: TileItem, fromSlotId: string | undefined, targetSlotId: string) => {
     sound.playTileSnap();
@@ -125,7 +147,18 @@ export const EquationBoard: React.FC<EquationBoardProps> = ({
       setHintDestinationSlotId(null);
       setHintArrowCoords(null);
     }
+
+    setDragState(null);
+    setNativeDraggingTile(null);
+    setHoveredSlotId(null);
   }, [slotPlacements, hintSourceTileId, hintDestinationSlotId]);
+
+  // Global drag reset helper
+  const handleDragEnd = useCallback(() => {
+    setDragState(null);
+    setNativeDraggingTile(null);
+    setHoveredSlotId(null);
+  }, []);
 
   // -------------------------------------------------------------
   // Automatic Evaluation (Fix 7 - Runs 350ms after final tile snaps)
@@ -233,13 +266,19 @@ export const EquationBoard: React.FC<EquationBoardProps> = ({
     if (e.button !== 0) return;
     sound.playTilePickup();
 
+    const rect = e.currentTarget.getBoundingClientRect();
+    const offsetX = e.clientX - rect.left;
+    const offsetY = e.clientY - rect.top;
+
     setDragState({
       tile,
       fromSlotId,
       startX: e.clientX,
       startY: e.clientY,
-      currentX: e.clientX - 32,
-      currentY: e.clientY - 32,
+      offsetX,
+      offsetY,
+      currentX: rect.left,
+      currentY: rect.top,
       hasMoved: false,
     });
   };
@@ -252,7 +291,6 @@ export const EquationBoard: React.FC<EquationBoardProps> = ({
   const handleNativeDrop = (slotId: string) => {
     if (nativeDraggingTile) {
       dropTileIntoSlot(nativeDraggingTile.tile, nativeDraggingTile.fromSlotId, slotId);
-      setNativeDraggingTile(null);
     }
   };
 
@@ -267,8 +305,8 @@ export const EquationBoard: React.FC<EquationBoardProps> = ({
       if (!prev) return null;
       return {
         ...prev,
-        currentX: e.clientX - 32,
-        currentY: e.clientY - 32,
+        currentX: e.clientX - prev.offsetX,
+        currentY: e.clientY - prev.offsetY,
         hasMoved,
       };
     });
@@ -276,10 +314,16 @@ export const EquationBoard: React.FC<EquationBoardProps> = ({
     if (hasMoved && slotsContainerRef.current) {
       const slotElements = slotsContainerRef.current.querySelectorAll('[data-slot-id]');
       let closestId: string | null = null;
-      let minDistance = 60; // Snap proximity threshold in px
+      let minDistance = 85; // Snap proximity threshold in px
 
       slotElements.forEach(el => {
         const rect = el.getBoundingClientRect();
+        const isInside =
+          e.clientX >= rect.left - 15 &&
+          e.clientX <= rect.right + 15 &&
+          e.clientY >= rect.top - 15 &&
+          e.clientY <= rect.bottom + 15;
+
         const centerX = rect.left + rect.width / 2;
         const centerY = rect.top + rect.height / 2;
         const dist = Math.hypot(e.clientX - centerX, e.clientY - centerY);
@@ -287,7 +331,7 @@ export const EquationBoard: React.FC<EquationBoardProps> = ({
         const expType = el.getAttribute('data-expected-type');
         const isCompatible = expType === 'any' || expType === dragState.tile.type;
 
-        if (dist < minDistance && isCompatible) {
+        if (isCompatible && (isInside || dist < minDistance)) {
           minDistance = dist;
           closestId = el.getAttribute('data-slot-id');
         }
@@ -298,7 +342,7 @@ export const EquationBoard: React.FC<EquationBoardProps> = ({
   }, [dragState]);
 
   // Pointer drop
-  const onPointerUp = useCallback(() => {
+  const onPointerUp = useCallback((e?: PointerEvent | MouseEvent) => {
     if (!dragState) return;
 
     const { tile, fromSlotId, hasMoved } = dragState;
@@ -307,23 +351,38 @@ export const EquationBoard: React.FC<EquationBoardProps> = ({
       if (fromSlotId) {
         handleSlottedTileClick(fromSlotId);
       }
-    } else if (hoveredSlotId) {
-      dropTileIntoSlot(tile, fromSlotId, hoveredSlotId);
     } else {
-      if (fromSlotId) {
-        sound.playTilePickup();
-        setSlotPlacements(prev => {
-          const next = { ...prev };
-          delete next[fromSlotId];
-          return next;
+      let targetSlotId: string | null = hoveredSlotId;
+
+      if (!targetSlotId && e && 'clientX' in e && slotsContainerRef.current) {
+        const slotElements = slotsContainerRef.current.querySelectorAll('[data-slot-id]');
+        slotElements.forEach(el => {
+          const rect = el.getBoundingClientRect();
+          const isInside =
+            e.clientX >= rect.left - 15 &&
+            e.clientX <= rect.right + 15 &&
+            e.clientY >= rect.top - 15 &&
+            e.clientY <= rect.bottom + 15;
+          const expType = el.getAttribute('data-expected-type');
+          const isCompatible = expType === 'any' || expType === tile.type;
+          if (isInside && isCompatible) {
+            targetSlotId = el.getAttribute('data-slot-id');
+          }
         });
-        setTrayTiles(prev => [...prev, tile]);
+      }
+
+      if (targetSlotId) {
+        dropTileIntoSlot(tile, fromSlotId, targetSlotId);
+      } else if (fromSlotId) {
+        // Dragged out of slot and released outside -> release back to tray!
+        releaseTileToTray(tile, fromSlotId);
       }
     }
 
     setDragState(null);
     setHoveredSlotId(null);
-  }, [dragState, hoveredSlotId, dropTileIntoSlot, handleSlottedTileClick]);
+    setNativeDraggingTile(null);
+  }, [dragState, hoveredSlotId, dropTileIntoSlot, handleSlottedTileClick, releaseTileToTray]);
 
   useEffect(() => {
     if (dragState) {
@@ -338,10 +397,45 @@ export const EquationBoard: React.FC<EquationBoardProps> = ({
     };
   }, [dragState, onPointerMove, onPointerUp]);
 
+  // Global safety handlers to ensure drag state always releases
+  useEffect(() => {
+    const handleGlobalDragRelease = () => {
+      setDragState(null);
+      setNativeDraggingTile(null);
+      setHoveredSlotId(null);
+    };
+
+    window.addEventListener('dragend', handleGlobalDragRelease);
+    window.addEventListener('mouseup', handleGlobalDragRelease);
+
+    return () => {
+      window.removeEventListener('dragend', handleGlobalDragRelease);
+      window.removeEventListener('mouseup', handleGlobalDragRelease);
+    };
+  }, []);
+
   return (
     <div
       ref={boardRef}
       data-testid="equation-board"
+      onDragOver={e => {
+        e.preventDefault();
+      }}
+      onDrop={e => {
+        try {
+          const raw = e.dataTransfer.getData('application/json');
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            if (parsed && parsed.tile && parsed.fromSlotId) {
+              releaseTileToTray(parsed.tile, parsed.fromSlotId);
+            }
+          }
+        } catch {}
+        if (nativeDraggingTile && nativeDraggingTile.fromSlotId) {
+          releaseTileToTray(nativeDraggingTile.tile, nativeDraggingTile.fromSlotId);
+        }
+        handleDragEnd();
+      }}
       className="relative z-10 flex flex-col items-center justify-between min-h-[calc(100dvh-64px)] max-w-4xl mx-auto px-3 sm:px-4 py-3 sm:py-5 w-full select-none touch-none"
     >
       {/* ---------------- Top Zone: Target Card & Hint Balance ---------------- */}
@@ -415,6 +509,7 @@ export const EquationBoard: React.FC<EquationBoardProps> = ({
                   slotPlacements[slot.id] &&
                   handleNativeDragStart(slotPlacements[slot.id], slot.id)
                 }
+                onDragEndTile={handleDragEnd}
                 onDragOver={e => {
                   e.preventDefault();
                   e.dataTransfer.dropEffect = 'move';
@@ -506,6 +601,28 @@ export const EquationBoard: React.FC<EquationBoardProps> = ({
       {/* ---------------- Bottom Zone: Tray of Draggable Tiles ---------------- */}
       <div
         data-testid="tile-tray"
+        onDragOver={e => {
+          e.preventDefault();
+          e.dataTransfer.dropEffect = 'move';
+        }}
+        onDrop={e => {
+          e.preventDefault();
+          setHoveredSlotId(null);
+          try {
+            const raw = e.dataTransfer.getData('application/json');
+            if (raw) {
+              const parsed = JSON.parse(raw);
+              if (parsed && parsed.tile) {
+                releaseTileToTray(parsed.tile, parsed.fromSlotId);
+                return;
+              }
+            }
+          } catch {}
+          if (nativeDraggingTile) {
+            releaseTileToTray(nativeDraggingTile.tile, nativeDraggingTile.fromSlotId);
+          }
+          handleDragEnd();
+        }}
         className="w-full bg-stone-100/95 backdrop-blur-md rounded-3xl p-3.5 sm:p-5 border-2 border-stone-200/90 shadow-inner"
       >
         <div className="flex items-center justify-center flex-wrap gap-2.5 sm:gap-4 min-h-[64px] sm:min-h-[96px]">
@@ -517,6 +634,7 @@ export const EquationBoard: React.FC<EquationBoardProps> = ({
               isHintTarget={hintSourceTileId === tile.id}
               onPointerDown={e => handlePointerDown(e, tile)}
               onDragStart={() => handleNativeDragStart(tile)}
+              onDragEnd={handleDragEnd}
             />
           ))}
 

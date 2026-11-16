@@ -165,4 +165,55 @@ test.describe('Number Builder - Closed-Loop Verification Suite', () => {
     // Auto-solves commutative solution
     await expect(page.getByTestId('celebration-modal')).toBeVisible({ timeout: 4000 });
   });
+
+  test('6. Drag-and-Drop Release Audit (Clean release, unslotting & return to tray)', async ({ page }) => {
+    const startBtn = page.getByTestId('start-button');
+    await startBtn.click();
+    await expect(page.getByTestId('equation-board')).toBeVisible();
+
+    const tile1 = page.locator('[data-testid="tile-tray"] [data-tile-value="1"]').first();
+    const slot1 = page.locator('[data-slot-id="s-1-1"]');
+
+    const tBox = await tile1.boundingBox();
+    const sBox = await slot1.boundingBox();
+    expect(tBox).not.toBeNull();
+    expect(sBox).not.toBeNull();
+
+    // 1. Mouse drag from tray to slot
+    await page.mouse.move(tBox!.x + tBox!.width / 2, tBox!.y + tBox!.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(sBox!.x + sBox!.width / 2, sBox!.y + sBox!.height / 2, { steps: 12 });
+    await page.mouse.up();
+
+    // Verify tile is placed and drag overlay is cleared
+    await expect(page.locator('[data-slot-id="s-1-1"] [data-tile-value="1"]')).toBeVisible();
+    await expect(page.locator('[data-testid="dragged-tile-overlay"]')).toHaveCount(0);
+
+    // 2. Drag placed tile OUT of slot to tray
+    const placedTile = page.locator('[data-slot-id="s-1-1"] [data-tile-value="1"]');
+    const tray = page.getByTestId('tile-tray');
+    const pBox = await placedTile.boundingBox();
+    const trBox = await tray.boundingBox();
+
+    await page.mouse.move(pBox!.x + pBox!.width / 2, pBox!.y + pBox!.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(trBox!.x + trBox!.width / 2, trBox!.y + trBox!.height / 2, { steps: 12 });
+    await page.mouse.up();
+
+    // Verify tile is released back into the tray and removed from slot
+    await expect(page.locator('[data-slot-id="s-1-1"] [data-tile-value="1"]')).toHaveCount(0);
+    await expect(page.locator('[data-testid="tile-tray"] [data-tile-value="1"]')).toBeVisible();
+    await expect(page.locator('[data-testid="dragged-tile-overlay"]')).toHaveCount(0);
+
+    // 3. Re-place tile and test tapping placed tile to release
+    await tile1.dragTo(slot1);
+    await expect(page.locator('[data-slot-id="s-1-1"] [data-tile-value="1"]')).toBeVisible();
+
+    const placedTileAgain = page.locator('[data-slot-id="s-1-1"] [data-tile-value="1"]');
+    await placedTileAgain.click();
+
+    // Verify tap releases back to tray
+    await expect(page.locator('[data-slot-id="s-1-1"] [data-tile-value="1"]')).toHaveCount(0);
+    await expect(page.locator('[data-testid="tile-tray"] [data-tile-value="1"]')).toBeVisible();
+  });
 });

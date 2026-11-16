@@ -12,6 +12,7 @@ interface SlotProps {
   onTileClick?: () => void;
   onPointerDownTile?: (e: React.PointerEvent<HTMLDivElement>) => void;
   onDragStartTile?: (e: React.DragEvent<HTMLDivElement>) => void;
+  onDragEndTile?: (e: React.DragEvent<HTMLDivElement>) => void;
   onDragOver?: (e: React.DragEvent<HTMLDivElement>) => void;
   onDragLeave?: (e: React.DragEvent<HTMLDivElement>) => void;
   onDrop?: (e: React.DragEvent<HTMLDivElement>) => void;
@@ -26,6 +27,7 @@ export const Slot: React.FC<SlotProps> = ({
   onTileClick,
   onPointerDownTile,
   onDragStartTile,
+  onDragEndTile,
   onDragOver,
   onDragLeave,
   onDrop,
@@ -79,6 +81,7 @@ export const Slot: React.FC<SlotProps> = ({
           onClick={onTileClick}
           onPointerDown={onPointerDownTile}
           onDragStart={onDragStartTile}
+          onDragEnd={onDragEndTile}
         />
       ) : (
         <span className="text-stone-400 font-extrabold text-xs sm:text-sm uppercase tracking-wider select-none pointer-events-none">

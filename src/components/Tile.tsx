@@ -12,6 +12,7 @@ interface TileProps {
   onClick?: () => void;
   onPointerDown?: (e: React.PointerEvent<HTMLDivElement>) => void;
   onDragStart?: (e: React.DragEvent<HTMLDivElement>) => void;
+  onDragEnd?: (e: React.DragEvent<HTMLDivElement>) => void;
 }
 
 export const Tile: React.FC<TileProps> = ({
@@ -25,6 +26,7 @@ export const Tile: React.FC<TileProps> = ({
   onClick,
   onPointerDown,
   onDragStart,
+  onDragEnd,
 }) => {
   const isOperator = tile.type === 'operator';
 
@@ -56,6 +58,9 @@ export const Tile: React.FC<TileProps> = ({
           e.dataTransfer.effectAllowed = 'move';
         } catch {}
         onDragStart?.(e);
+      }}
+      onDragEnd={isLocked ? undefined : (e) => {
+        onDragEnd?.(e);
       }}
       data-tile-id={tile.id}
       data-tile-value={tile.value}
