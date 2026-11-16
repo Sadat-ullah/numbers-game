@@ -109,8 +109,8 @@ test.describe('Number Builder - Closed-Loop Verification Suite', () => {
     await expect(celebrationModal).toBeVisible({ timeout: 4000 });
     await expect(page.locator('text=Solved!')).toBeVisible();
 
-    // Clean 3-star solve awards +1 Hint reward badge (Fix 2)
-    await expect(page.getByTestId('hint-reward-badge')).toBeVisible();
+    // On Level 1, no hint milestone is reached (requires 10 levels)
+    await expect(page.getByTestId('hint-reward-badge')).toHaveCount(0);
   });
 
   test('4. Hint Economy & High-Visibility Highlighting Audit', async ({ page }) => {
@@ -215,5 +215,53 @@ test.describe('Number Builder - Closed-Loop Verification Suite', () => {
     // Verify tap releases back to tray
     await expect(page.locator('[data-slot-id="s-1-1"] [data-tile-value="1"]')).toHaveCount(0);
     await expect(page.locator('[data-testid="tile-tray"] [data-tile-value="1"]')).toBeVisible();
+  });
+
+  test('7. Hint Economy: Completing 10 levels awards 2 hints', async ({ page }) => {
+    // Seed 9 completed levels in localStorage so Level 10 completes the 10th level
+    await page.evaluate(() => {
+      localStorage.setItem('nb_hint_balance', '3');
+      localStorage.setItem('nb_current_level', '10');
+      localStorage.setItem('nb_unlocked_level', '10');
+      localStorage.setItem('nb_level_stars', JSON.stringify({
+        1: 3, 2: 3, 3: 3, 4: 3, 5: 3, 6: 3, 7: 3, 8: 3, 9: 3
+      }));
+      localStorage.setItem('nb_rewarded_milestones', JSON.stringify([]));
+    });
+    await page.reload();
+
+    const startBtn = page.getByTestId('start-button');
+    await startBtn.click();
+    await expect(page.getByTestId('equation-board')).toBeVisible();
+
+    // Verify hint balance starts at 3
+    const hintCounter = page.getByTestId('hint-counter');
+    await expect(hintCounter).toHaveText('3');
+
+    // Level 10: Target = 10, Slots: [8] + [2] = 10
+    const tile8 = page.locator('[data-testid="tile-tray"] [data-tile-value="8"]').first();
+    const tile2 = page.locator('[data-testid="tile-tray"] [data-tile-value="2"]').first();
+    const slot1 = page.locator('[data-slot-id="s-10-1"]');
+    const slot2 = page.locator('[data-slot-id="s-10-2"]');
+
+    await tile8.dragTo(slot1);
+    await page.waitForTimeout(150);
+    await tile2.dragTo(slot2);
+
+    // Auto-check solves level 10
+    const celebrationModal = page.getByTestId('celebration-modal');
+    await expect(celebrationModal).toBeVisible({ timeout: 4000 });
+
+    // Expect +2 Hints Earned badge!
+    const rewardBadge = page.getByTestId('hint-reward-badge');
+    await expect(rewardBadge).toBeVisible();
+    await expect(rewardBadge).toContainText('+2 💡 Hints Earned!');
+
+    // Advance to next level (Level 11)
+    await page.getByTestId('celebration-next-button').click();
+    await expect(celebrationModal).toHaveCount(0);
+
+    // Verify hint balance is now 5 (3 + 2 = 5)
+    await expect(page.getByTestId('hint-counter')).toHaveText('5');
   });
 });

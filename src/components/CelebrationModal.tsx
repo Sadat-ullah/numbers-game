@@ -7,6 +7,7 @@ interface CelebrationModalProps {
   levelId: number;
   stars: number;
   hintEarned?: boolean;
+  hintsEarned?: number;
   onNextLevel: () => void;
   onReplayLevel: () => void;
   onOpenLevelGrid: () => void;
@@ -16,10 +17,12 @@ export const CelebrationModal: React.FC<CelebrationModalProps> = ({
   levelId,
   stars,
   hintEarned = false,
+  hintsEarned,
   onNextLevel,
   onReplayLevel,
   onOpenLevelGrid,
 }) => {
+  const earnedCount = hintsEarned !== undefined ? hintsEarned : hintEarned ? 1 : 0;
   useEffect(() => {
     // Fire geometric pastel confetti
     confetti({
@@ -73,14 +76,14 @@ export const CelebrationModal: React.FC<CelebrationModalProps> = ({
           })}
         </div>
 
-        {/* Hint Earned Badge (Fix 2) */}
-        {hintEarned && (
+        {/* Hint Earned Badge */}
+        {earnedCount > 0 && (
           <div
             data-testid="hint-reward-badge"
             className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-amber-100 to-yellow-100 border border-amber-300 text-amber-900 font-extrabold text-xs mb-3 shadow-xs animate-bounce"
           >
             <Lightbulb size={15} className="fill-amber-500 text-amber-600 shrink-0" />
-            <span>+1 💡 Hint Earned!</span>
+            <span>+{earnedCount} 💡 Hint{earnedCount > 1 ? 's' : ''} Earned!</span>
           </div>
         )}
 

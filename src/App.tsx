@@ -33,9 +33,14 @@ export function App() {
     return saved ? Math.max(0, parseInt(saved, 10)) : 3;
   });
 
+  const [rewardedMilestones, setRewardedMilestones] = useState<number[]>(() => {
+    const saved = localStorage.getItem('nb_rewarded_milestones');
+    return saved ? JSON.parse(saved) : [];
+  });
+
   const [isCelebrationOpen, setIsCelebrationOpen] = useState(false);
   const [celebrationStars, setCelebrationStars] = useState(3);
-  const [hintEarnedThisLevel, setHintEarnedThisLevel] = useState(false);
+  const [hintsEarnedThisLevel, setHintsEarnedThisLevel] = useState<number>(0);
 
   // Sync state to localStorage
   useEffect(() => {
@@ -54,6 +59,10 @@ export function App() {
     localStorage.setItem('nb_hint_balance', String(hintBalance));
   }, [hintBalance]);
 
+  useEffect(() => {
+    localStorage.setItem('nb_rewarded_milestones', JSON.stringify(rewardedMilestones));
+  }, [rewardedMilestones]);
+
   const activeLevel = ALL_LEVELS.find(l => l.id === currentLevelId) || ALL_LEVELS[0];
   const totalStars = Object.values(levelStars).reduce((acc, curr) => acc + curr, 0);
 
@@ -64,22 +73,26 @@ export function App() {
   const handleLevelCompleted = (stars: number) => {
     setCelebrationStars(stars);
 
-    // Earning Hints: Reward +1 Hint every 3-star clear or milestone
-    const earnedHint = stars === 3 || currentLevelId % 3 === 0;
-    if (earnedHint) {
-      setHintBalance(prev => prev + 1);
-      setHintEarnedThisLevel(true);
-    } else {
-      setHintEarnedThisLevel(false);
+    // Save star rating (keep best)
+    const newLevelStars = {
+      ...levelStars,
+      [currentLevelId]: Math.max(levelStars[currentLevelId] || 0, stars),
+    };
+    setLevelStars(newLevelStars);
+
+    // Earning Hints: On completion of 10 levels, 2 hints are added to user's hint balance
+    const totalCompletedLevels = Object.keys(newLevelStars).length;
+    const milestoneTarget = Math.floor(totalCompletedLevels / 10) * 10;
+
+    let earned = 0;
+    if (milestoneTarget >= 10 && !rewardedMilestones.includes(milestoneTarget)) {
+      earned = 2;
+      setHintBalance(prev => prev + 2);
+      setRewardedMilestones(prev => [...prev, milestoneTarget]);
     }
 
+    setHintsEarnedThisLevel(earned);
     setIsCelebrationOpen(true);
-
-    // Save star rating (keep best)
-    setLevelStars(prev => ({
-      ...prev,
-      [currentLevelId]: Math.max(prev[currentLevelId] || 0, stars),
-    }));
 
     // Unlock next level
     if (currentLevelId < 100) {
@@ -89,7 +102,7 @@ export function App() {
 
   const handleNextLevel = () => {
     setIsCelebrationOpen(false);
-    setHintEarnedThisLevel(false);
+    setHintsEarnedThisLevel(0);
     if (currentLevelId < 100) {
       setCurrentLevelId(prev => prev + 1);
     } else {
@@ -99,7 +112,7 @@ export function App() {
 
   const handleReplayLevel = () => {
     setIsCelebrationOpen(false);
-    setHintEarnedThisLevel(false);
+    setHintsEarnedThisLevel(0);
   };
 
   const handleStartGame = () => {
@@ -164,11 +177,12 @@ export function App() {
           key={`celeb-${currentLevelId}`}
           levelId={currentLevelId}
           stars={celebrationStars}
-          hintEarned={hintEarnedThisLevel}
+          hintsEarned={hintsEarnedThisLevel}
           onNextLevel={handleNextLevel}
           onReplayLevel={handleReplayLevel}
           onOpenLevelGrid={() => {
             setIsCelebrationOpen(false);
+            setHintsEarnedThisLevel(0);
             setScreen('grid');
           }}
         />
