@@ -28,7 +28,7 @@ export const ChapterGridScreen: React.FC<ChapterGridScreenProps> = ({
   const worldLevels = ALL_LEVELS.filter(lvl => lvl.world === selectedWorld);
 
   return (
-    <div className="relative z-10 max-w-5xl mx-auto px-4 py-6 w-full flex flex-col min-h-[calc(100vh-68px)]">
+    <div className="relative z-10 max-w-5xl mx-auto px-3 sm:px-4 py-4 sm:py-6 w-full flex flex-col min-h-[calc(100dvh-68px)]">
       {/* Top Navigation */}
       <div className="flex items-center justify-between mb-6">
         <button

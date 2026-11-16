@@ -17,7 +17,7 @@ class SoundEngine {
     this.sfxMuted = savedSfx === 'true';
   }
 
-  private initContext() {
+  public initContext() {
     if (!this.ctx) {
       const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
       this.ctx = new AudioCtx();
@@ -258,3 +258,19 @@ class SoundEngine {
 }
 
 export const sound = new SoundEngine();
+
+// Auto-unlock Web Audio context on mobile touch
+if (typeof window !== 'undefined') {
+  const unlockAudio = () => {
+    if ((sound as unknown as { initContext: () => void }).initContext) {
+      (sound as unknown as { initContext: () => void }).initContext();
+    }
+    window.removeEventListener('touchstart', unlockAudio);
+    window.removeEventListener('touchend', unlockAudio);
+    window.removeEventListener('click', unlockAudio);
+  };
+  window.addEventListener('touchstart', unlockAudio, { passive: true });
+  window.addEventListener('touchend', unlockAudio, { passive: true });
+  window.addEventListener('click', unlockAudio, { passive: true });
+}
+

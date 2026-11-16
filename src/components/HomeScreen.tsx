@@ -35,12 +35,12 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   };
 
   return (
-    <div className="relative z-10 flex flex-col items-center justify-between min-h-[calc(100vh-68px)] max-w-4xl mx-auto px-4 py-8 text-center select-none">
+    <div className="relative z-10 flex flex-col items-center justify-between min-h-[100dvh] max-w-4xl mx-auto px-4 py-4 sm:py-8 text-center select-none">
       {/* Top audio bar */}
       <div className="w-full flex items-center justify-end gap-2">
         <button
           onClick={toggleMusic}
-          className={`p-2.5 rounded-xl border flex items-center justify-center shadow-xs transition-all ${
+          className={`p-2.5 rounded-xl border flex items-center justify-center shadow-xs transition-all cursor-pointer ${
             musicMuted
               ? 'bg-stone-200/80 border-stone-300 text-stone-400'
               : 'bg-amber-50 border-amber-300/80 text-amber-700'
@@ -52,7 +52,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 
         <button
           onClick={toggleSfx}
-          className={`p-2.5 rounded-xl border flex items-center justify-center shadow-xs transition-all ${
+          className={`p-2.5 rounded-xl border flex items-center justify-center shadow-xs transition-all cursor-pointer ${
             sfxMuted
               ? 'bg-stone-200/80 border-stone-300 text-stone-400'
               : 'bg-teal-50 border-teal-300/80 text-teal-700'
@@ -64,57 +64,57 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
       </div>
 
       {/* Main Logo & Title Hero */}
-      <div className="flex flex-col items-center my-auto">
-        <div className="relative mb-4 group cursor-pointer" onClick={() => sound.playTileSnap()}>
+      <div className="flex flex-col items-center my-auto w-full">
+        <div className="relative mb-3 sm:mb-4 group cursor-pointer" onClick={() => sound.playTileSnap()}>
           {/* Logo with clean drop shadow */}
           <img
             src="/assets/logo_number_builder.png"
             alt="Number Builder"
-            className="w-80 sm:w-96 max-w-full h-auto drop-shadow-xl transition-transform duration-300 group-hover:scale-105"
+            className="w-72 sm:w-96 max-w-[85vw] h-auto drop-shadow-xl transition-transform duration-300 group-hover:scale-105"
           />
         </div>
 
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/80 border border-stone-200 shadow-xs mb-3">
-          <Sparkles size={16} className="text-amber-500" />
-          <span className="text-xs sm:text-sm font-bold text-stone-700 tracking-wide">
+        <div className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1 sm:py-1.5 rounded-full bg-white/80 border border-stone-200 shadow-xs mb-2 sm:mb-3">
+          <Sparkles size={15} className="text-amber-500 shrink-0" />
+          <span className="text-[11px] sm:text-sm font-bold text-stone-700 tracking-wide">
             Tactile Geometric Math Puzzle • Ages 3–12
           </span>
         </div>
 
-        <p className="text-stone-500 max-w-md text-sm sm:text-base font-medium leading-relaxed px-4">
+        <p className="text-stone-500 max-w-sm sm:max-w-md text-xs sm:text-base font-medium leading-relaxed px-2">
           Snap magnetic wooden blocks to balance equations, discover arithmetic patterns, and conquer all 10 worlds!
         </p>
 
         {/* Player Stats Chips */}
-        <div className="flex items-center gap-4 my-6">
-          <div className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-amber-50 border border-amber-200 shadow-xs">
-            <span className="text-xl">⭐</span>
+        <div className="flex items-center gap-3 sm:gap-4 my-4 sm:my-6">
+          <div className="flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-2xl bg-amber-50 border border-amber-200 shadow-xs">
+            <span className="text-lg sm:text-xl">⭐</span>
             <div className="text-left">
-              <div className="text-[10px] font-bold text-amber-600 uppercase">Stars</div>
-              <div className="text-base font-extrabold text-amber-900 leading-none">{totalStars}</div>
+              <div className="text-[9px] sm:text-[10px] font-bold text-amber-600 uppercase">Stars</div>
+              <div className="text-sm sm:text-base font-extrabold text-amber-900 leading-none">{totalStars}</div>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-teal-50 border border-teal-200 shadow-xs">
-            <span className="text-xl">🗺️</span>
+          <div className="flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-2xl bg-teal-50 border border-teal-200 shadow-xs">
+            <span className="text-lg sm:text-xl">🗺️</span>
             <div className="text-left">
-              <div className="text-[10px] font-bold text-teal-600 uppercase">Progress</div>
-              <div className="text-base font-extrabold text-teal-900 leading-none">{maxUnlockedLevel}/100</div>
+              <div className="text-[9px] sm:text-[10px] font-bold text-teal-600 uppercase">Progress</div>
+              <div className="text-sm sm:text-base font-extrabold text-teal-900 leading-none">{maxUnlockedLevel}/100</div>
             </div>
           </div>
         </div>
 
         {/* Action Buttons */}
-        <div className="flex flex-col sm:flex-row items-center gap-3 w-full max-w-xs sm:max-w-md">
+        <div className="flex flex-col sm:flex-row items-center gap-2.5 sm:gap-3 w-full max-w-xs sm:max-w-md px-2">
           <button
             onClick={() => {
               sound.playTilePickup();
               sound.startStudioMusic();
               onStartGame();
             }}
-            className="tactile-button w-full sm:flex-1 py-4 px-6 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 text-white font-extrabold text-lg sm:text-xl flex items-center justify-center gap-2 border-b-4 border-orange-700 active:border-b-0 cursor-pointer shadow-lg hover:brightness-105"
+            className="tactile-button w-full sm:flex-1 py-3.5 sm:py-4 px-6 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 text-white font-extrabold text-base sm:text-xl flex items-center justify-center gap-2 border-b-4 border-orange-700 active:border-b-0 cursor-pointer shadow-lg hover:brightness-105"
           >
-            <Play size={22} className="fill-white" />
+            <Play size={20} className="fill-white" />
             <span>Play Level {currentLevelId}</span>
           </button>
 
@@ -123,16 +123,16 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               sound.playTilePickup();
               onOpenLevelGrid();
             }}
-            className="w-full sm:w-auto py-4 px-6 rounded-2xl bg-white hover:bg-stone-50 text-stone-700 font-extrabold text-base border-2 border-stone-200 flex items-center justify-center gap-2 shadow-xs active:scale-95 transition-all"
+            className="w-full sm:w-auto py-3.5 sm:py-4 px-6 rounded-2xl bg-white hover:bg-stone-50 text-stone-700 font-extrabold text-sm sm:text-base border-2 border-stone-200 flex items-center justify-center gap-2 shadow-xs active:scale-95 transition-all cursor-pointer"
           >
-            <Grid size={20} />
+            <Grid size={18} />
             <span>100 Levels</span>
           </button>
         </div>
       </div>
 
       {/* Footer Info */}
-      <footer className="text-xs text-stone-400 font-medium py-2">
+      <footer className="text-[11px] sm:text-xs text-stone-400 font-medium py-2">
         Warm Pastel Studio • Lo-fi Kalimba & Tactile Physics
       </footer>
     </div>
