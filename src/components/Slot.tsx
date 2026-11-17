@@ -46,8 +46,8 @@ export const Slot: React.FC<SlotProps> = ({
     return (
       <div className="relative flex flex-col items-center shrink-0">
         <Tile tile={lockedTileItem} isInSlot={true} isLocked={true} compact={compact} />
-        <div className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-stone-600 text-white flex items-center justify-center shadow-xs">
-          <Lock size={11} strokeWidth={2.5} />
+        <div className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-teal-900 border border-teal-400/80 text-amber-300 flex items-center justify-center shadow-sm">
+          <Lock size={10} strokeWidth={2.5} />
         </div>
       </div>
     );
@@ -62,13 +62,13 @@ export const Slot: React.FC<SlotProps> = ({
       onDrop={onDrop}
       className={`relative select-none flex items-center justify-center transition-all duration-150 shrink-0 ${sizeClasses} ${
         slottedTile
-          ? 'bg-transparent'
+          ? 'bg-transparent animate-in zoom-in-95 duration-150'
           : `slot-sunken border-3 border-dashed ${
               isHintTarget
                 ? 'hint-highlight border-amber-500 bg-amber-100/90 ring-4 ring-amber-400'
                 : isHoveredOver
-                ? 'bg-amber-100/90 border-amber-500 scale-105 ring-4 ring-amber-300/80'
-                : 'bg-stone-200/70 border-stone-300/90'
+                ? 'bg-amber-100/95 border-amber-500 scale-108 ring-4 ring-amber-400/80 shadow-lg'
+                : 'bg-stone-200/75 border-stone-300 hover:border-amber-400/60'
             }`
       }`}
     >

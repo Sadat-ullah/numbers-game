@@ -197,6 +197,69 @@ class SoundEngine {
   }
 
   /**
+   * Cute procedural marimba voice chirp for mascot Pip
+   */
+  public playMascotChirp() {
+    if (this.sfxMuted) return;
+    this.initContext();
+    if (!this.ctx || !this.sfxGain) return;
+
+    // Two playful ascending marimba notes
+    const freqs = [587.33, 880.00]; // D5, A5
+    freqs.forEach((freq, idx) => {
+      const t = this.ctx!.currentTime + idx * 0.09;
+      const osc = this.ctx!.createOscillator();
+      const overtone = this.ctx!.createOscillator();
+      const gain = this.ctx!.createGain();
+
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(freq, t);
+      overtone.type = 'sine';
+      overtone.frequency.setValueAtTime(freq * 3, t);
+
+      gain.gain.setValueAtTime(0.28, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.22);
+
+      osc.connect(gain);
+      overtone.connect(gain);
+      gain.connect(this.sfxGain!);
+
+      osc.start(t);
+      overtone.start(t);
+      osc.stop(t + 0.25);
+      overtone.stop(t + 0.25);
+    });
+  }
+
+  /**
+   * Excited celebratory trill when mascot cheers
+   */
+  public playMascotCelebrate() {
+    if (this.sfxMuted) return;
+    this.initContext();
+    if (!this.ctx || !this.sfxGain) return;
+
+    const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+    notes.forEach((freq, idx) => {
+      const t = this.ctx!.currentTime + idx * 0.06;
+      const osc = this.ctx!.createOscillator();
+      const gain = this.ctx!.createGain();
+
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, t);
+
+      gain.gain.setValueAtTime(0.25, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
+
+      osc.connect(gain);
+      gain.connect(this.sfxGain!);
+
+      osc.start(t);
+      osc.stop(t + 0.35);
+    });
+  }
+
+  /**
    * Procedural Lo-Fi Kalimba ambient background loop
    */
   public startStudioMusic() {

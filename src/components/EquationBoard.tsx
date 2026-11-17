@@ -6,6 +6,7 @@ import { Slot } from './Slot';
 import { Tile } from './Tile';
 import { Lightbulb, RotateCcw } from 'lucide-react';
 import { solveLevel } from '../game/levels/solver';
+import { BuilderMascot, MascotState } from './BuilderMascot';
 
 interface EquationBoardProps {
   level: LevelData;
@@ -59,6 +60,17 @@ export const EquationBoard: React.FC<EquationBoardProps> = ({
 
   const isCompact = level.slots.length >= 5;
   const openSlots = level.slots.filter(s => !s.isLocked);
+
+  // Mascot dynamic state calculation
+  const mascotState: MascotState = isSuccessGlow
+    ? 'celebrate'
+    : isShaking
+    ? 'encourage'
+    : dragState && dragState.hasMoved
+    ? 'dragging'
+    : hintSourceTileId
+    ? 'hint'
+    : 'idle';
 
   // Reset state when level changes
   useEffect(() => {
@@ -477,6 +489,29 @@ export const EquationBoard: React.FC<EquationBoardProps> = ({
 
       {/* ---------------- Middle Zone: Enlarged Game Arena (Fix 9) ---------------- */}
       <div className="flex-1 flex flex-col items-center justify-center w-full my-auto py-2">
+        {/* Companion Mascot Bar */}
+        <div className="w-full flex items-center justify-center max-w-xl px-2 mb-2">
+          <div className="flex items-center gap-2.5 bg-white/80 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-stone-200/90 shadow-2xs">
+            <BuilderMascot
+              size="sm"
+              state={mascotState}
+              showSpeechBubble={false}
+              dragPosition={dragState && dragState.hasMoved ? { x: dragState.currentX, y: dragState.currentY } : null}
+            />
+            <span className="text-[11px] sm:text-xs font-bold text-stone-600 select-none">
+              {isSuccessGlow
+                ? "🎉 Brilliant equation!"
+                : isShaking
+                ? "💡 So close! Try swapping a block!"
+                : hintSourceTileId
+                ? "✨ Follow the glowing clue!"
+                : dragState && dragState.hasMoved
+                ? "👀 Placing the block..."
+                : "Drop blocks into slots to reach target!"}
+            </span>
+          </div>
+        </div>
+
         <div
           style={{ width: 'min(94vw, 820px)' }}
           className="flex justify-center items-center py-2 px-1 overflow-x-auto"

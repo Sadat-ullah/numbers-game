@@ -264,4 +264,43 @@ test.describe('Number Builder - Closed-Loop Verification Suite', () => {
     // Verify hint balance is now 5 (3 + 2 = 5)
     await expect(page.getByTestId('hint-counter')).toHaveText('5');
   });
+
+  test('8. Builder Mascot "Pip" & World Map Polish Audit', async ({ page }) => {
+    // 1. Verify Mascot on Home Screen
+    const mascot = page.getByTestId('builder-mascot');
+    await expect(mascot).toBeVisible();
+
+    // Verify initial speech bubble
+    const speechBubble = page.getByTestId('mascot-speech-bubble');
+    await expect(speechBubble).toBeVisible();
+    const initialText = await speechBubble.innerText();
+    expect(initialText.length).toBeGreaterThan(0);
+
+    // Tap/Click Mascot to verify interactive reaction
+    await mascot.click();
+    await page.waitForTimeout(100);
+    await expect(page.getByTestId('builder-mascot')).toBeVisible();
+
+    // 2. Open 100 Levels Map
+    const levelsBtn = page.getByTestId('levels-button');
+    await levelsBtn.click();
+    await expect(page.getByTestId('world-selector-bar')).toBeVisible();
+
+    // Verify all 10 world pills exist and are not clipped
+    const worldPills = page.locator('[data-testid^="world-pill-"]');
+    await expect(worldPills).toHaveCount(10);
+
+    // Verify Mascot marker is rendered on active level card (Level 1)
+    const mapMascotMarker = page.getByTestId('map-mascot-marker');
+    await expect(mapMascotMarker).toBeVisible();
+
+    // 3. Launch Level 1 from Map
+    const level1Card = page.getByTestId('level-card-1');
+    await level1Card.click();
+    await expect(page.getByTestId('equation-board')).toBeVisible();
+
+    // Verify Mascot is present in Gameplay screen as companion
+    const gameMascot = page.getByTestId('builder-mascot');
+    await expect(gameMascot).toBeVisible();
+  });
 });

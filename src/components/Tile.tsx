@@ -32,10 +32,13 @@ export const Tile: React.FC<TileProps> = ({
 
   // Tactile color schemes for wooden/acrylic magnetic blocks
   let colorClasses = '';
-  if (isLocked) {
-    colorClasses = 'bg-stone-300 text-stone-600 border-b-3 sm:border-b-4 border-stone-400 shadow-inner cursor-not-allowed';
+  if (isOperator && isLocked) {
+    // Rich teal-cyan 3D tactile block with crisp white symbol
+    colorClasses = 'bg-gradient-to-b from-teal-500 via-cyan-600 to-teal-700 text-white border-b-3 sm:border-b-4 border-teal-900 shadow-md cursor-default';
+  } else if (isLocked) {
+    colorClasses = 'bg-gradient-to-b from-stone-200 to-stone-300 text-stone-700 border-b-3 sm:border-b-4 border-stone-400 shadow-inner cursor-not-allowed';
   } else if (isOperator) {
-    colorClasses = 'bg-gradient-to-b from-cyan-400 to-teal-500 text-white border-b-3 sm:border-b-4 border-teal-700 shadow-teal-900/20';
+    colorClasses = 'bg-gradient-to-b from-cyan-400 via-teal-400 to-teal-500 text-white border-b-3 sm:border-b-4 border-teal-700 shadow-teal-900/20';
   } else {
     // Number tile: Warm honey acrylic / wooden aesthetic
     colorClasses = 'bg-gradient-to-b from-amber-300 via-orange-300 to-amber-400 text-amber-950 border-b-3 sm:border-b-4 border-amber-600 shadow-amber-900/20';
