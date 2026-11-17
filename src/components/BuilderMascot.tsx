@@ -19,7 +19,7 @@ const DEFAULT_SPEECH_PHRASES: Record<MascotState, string[]> = {
     "Drag the blocks to solve! ✨",
     "You can do it! 🚀",
     "Numbers are fun! 🧩",
-    "Tap me anytime! 💛",
+    "Ready to build! 💛",
   ],
   tap_react: [
     "Wooo! You're awesome! 🎉",

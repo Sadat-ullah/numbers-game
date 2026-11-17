@@ -86,8 +86,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           <div className="flex items-center justify-center mt-2 md:mt-0">
             <BuilderMascot
               size="md"
+              showSpeechBubble={false}
               className="scale-90 sm:scale-100"
-              speechBubbleText="Tap me to play! 🔨"
             />
           </div>
         </div>

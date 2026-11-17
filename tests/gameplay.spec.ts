@@ -270,11 +270,9 @@ test.describe('Number Builder - Closed-Loop Verification Suite', () => {
     const mascot = page.getByTestId('builder-mascot');
     await expect(mascot).toBeVisible();
 
-    // Verify initial speech bubble
-    const speechBubble = page.getByTestId('mascot-speech-bubble');
-    await expect(speechBubble).toBeVisible();
-    const initialText = await speechBubble.innerText();
-    expect(initialText.length).toBeGreaterThan(0);
+    // Verify "Tap me to play" text is removed from the Home Screen
+    const bodyText = await page.innerText('body');
+    expect(bodyText.toLowerCase()).not.toContain('tap me to play');
 
     // Tap/Click Mascot to verify interactive reaction
     await mascot.click();
